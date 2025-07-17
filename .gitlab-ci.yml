@@ -1,0 +1,14 @@
+stages:
+  - ci
+
+cargo-fmt:
+  stage: ci
+  image: rustlang/rust:nightly
+  script:
+    - cargo fmt --check
+
+cargo-test:
+  stage: ci
+  image: rust:1.88
+  script:
+    - cargo test
