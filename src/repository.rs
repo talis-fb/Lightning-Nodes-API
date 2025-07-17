@@ -1,35 +1,42 @@
+use std::sync::Arc;
+
+use async_trait::async_trait;
+use tokio::sync::RwLock;
+
 use crate::entity::LightningNodes;
 
-pub trait NodesRepository {
-    fn get_last_nodes(&self) -> Vec<LightningNodes>;
-    fn append_nodes(&self, nodes: Vec<LightningNodes>);
+#[async_trait]
+pub trait NodesRepository: Send + Sync {
+    async fn get_last_nodes(&self) -> Vec<LightningNodes>;
+    async fn append_nodes(&self, nodes: Vec<LightningNodes>);
 }
 
-
 #[derive(Default)]
-pub struct InMemoryNodesRepository(pub Vec<LightningNodes>);
+pub struct InMemoryNodesRepository(pub Arc<RwLock<Vec<LightningNodes>>>);
 
+#[async_trait]
 impl NodesRepository for InMemoryNodesRepository {
-    fn get_last_nodes(&self) -> Vec<LightningNodes> {
-        self.0.clone()
+    async fn get_last_nodes(&self) -> Vec<LightningNodes> {
+        (*self.0.read().await).clone()
     }
 
-    fn append_nodes(&self, nodes: Vec<LightningNodes>) {
-        self.0 = nodes.into_iter().collect();
+    async fn append_nodes(&self, nodes: Vec<LightningNodes>) {
+        let mut guard = self.0.write().await;
+        *guard = nodes;
     }
 }
 
-
-pub trait MempoolAPIRepository {
+#[async_trait]
+pub trait MempoolAPIRepository: Send + Sync {
     fn get_last_nodes(&self) -> Vec<LightningNodes>;
 }
 
-
 #[derive(Default)]
-pub struct MockMempoolAPIRepository(pub Vec<LightningNodes>);
+pub struct MockMempoolAPIRepository(pub Arc<Vec<LightningNodes>>);
 
+#[async_trait]
 impl MempoolAPIRepository for MockMempoolAPIRepository {
     fn get_last_nodes(&self) -> Vec<LightningNodes> {
-        self.0.clone()
+        (*self.0).clone()
     }
 }
