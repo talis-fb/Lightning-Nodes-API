@@ -5,6 +5,7 @@ cargo-fmt:
   stage: ci
   image: rustlang/rust:nightly
   script:
+    - rustup component add rustfmt
     - cargo fmt --check
 
 cargo-test:
