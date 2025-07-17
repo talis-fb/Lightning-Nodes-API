@@ -8,6 +8,12 @@ cargo-fmt:
     - rustup component add rustfmt
     - cargo fmt --check
 
+cargo-build-test:
+  stage: ci
+  image: rust:1.88
+  script:
+    - cargo build --release
+
 cargo-test:
   stage: ci
   image: rust:1.88
