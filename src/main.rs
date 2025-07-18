@@ -1,14 +1,13 @@
-use axum::Router;
-use axum::routing::get;
+mod api;
+mod context;
+mod errors;
+mod handlers;
+mod models;
+mod repository;
 
 #[tokio::main]
 async fn main() {
-    // build our application with a single route
-    let app = Router::new()
-        .route("/ping", get(|| async { "pong" }))
-        .route("/nodes", get(|| async { "Hello, Nodes!" }));
-
-    // run our app with hyper, listening globally on port 3000
+    let app = api::app_router().await;
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
