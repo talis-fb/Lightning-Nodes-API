@@ -4,7 +4,6 @@ use axum::routing::get;
 use crate::context::AppContext;
 
 mod endpoints;
-pub mod errors;
 
 pub async fn app_router() -> Router {
     let app_context = AppContext::new().await;
