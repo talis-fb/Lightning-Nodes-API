@@ -1,5 +1,4 @@
 use std::sync::Arc;
-use std::time::UNIX_EPOCH;
 
 use async_trait::async_trait;
 use tokio::sync::RwLock;
@@ -29,17 +28,6 @@ pub struct MockMempoolAPIRepository(pub Vec<LightningNodes>);
 #[async_trait]
 impl MempoolAPIRepository for MockMempoolAPIRepository {
     async fn get_last_nodes(&self) -> anyhow::Result<Vec<LightningNodes>> {
-        Ok(self
-            .0
-            .iter()
-            .cloned()
-            .map(|mut node| {
-                node.first_seen = std::time::SystemTime::now()
-                    .duration_since(UNIX_EPOCH)
-                    .unwrap()
-                    .as_secs();
-                node
-            })
-            .collect())
+        Ok(self.0.clone())
     }
 }
