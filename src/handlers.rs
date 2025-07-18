@@ -1,19 +1,27 @@
-use crate::entity::LightningNodes;
+use std::sync::Arc;
+
+use crate::models::LightningNodes;
 use crate::repository::{MempoolAPIRepository, NodesRepository};
 
-pub async fn update_last_nodes(
-    mempool_api_repository: impl MempoolAPIRepository,
-    nodes_repository: impl NodesRepository,
-) -> Result<Vec<LightningNodes>, String> {
-    let new_last_nodes = mempool_api_repository.get_last_nodes();
-
-    nodes_repository.append_nodes(new_last_nodes);
-
-    Ok(nodes_repository.get_last_nodes().await)
+pub struct UpdateLastNodes {
+    pub mempool_api_repository: Arc<dyn MempoolAPIRepository>,
+    pub nodes_repository: Arc<dyn NodesRepository>,
 }
 
-pub async fn get_last_nodes(
-    nodes_repository: &dyn NodesRepository,
-) -> Result<Vec<LightningNodes>, String> {
-    Ok(nodes_repository.get_last_nodes().await)
+impl UpdateLastNodes {
+    pub async fn exec(self) -> Result<Vec<LightningNodes>, String> {
+        let nodes = self.mempool_api_repository.get_last_nodes().await;
+        self.nodes_repository.append_nodes(nodes).await;
+        Ok(self.nodes_repository.get_last_nodes().await)
+    }
+}
+
+pub struct GetLastNodes {
+    pub nodes_repository: Arc<dyn NodesRepository>,
+}
+
+impl GetLastNodes {
+    pub async fn exec(self) -> Result<Vec<LightningNodes>, String> {
+        Ok(self.nodes_repository.get_last_nodes().await)
+    }
 }

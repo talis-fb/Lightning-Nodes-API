@@ -1,71 +1,46 @@
-use std::sync::Arc;
-
-use axum::Router;
+use axum::extract::State;
 use axum::routing::get;
-use tokio::sync::RwLock;
+use axum::{Json, Router};
 
-use crate::entity::LightningNodes;
-use crate::{handlers, repository};
-
-#[derive(Clone)]
-pub struct AppContext {
-    pub mempool_api_repository: Arc<RwLock<dyn repository::MempoolAPIRepository>>,
-    pub nodes_repository: Arc<RwLock<dyn repository::NodesRepository>>,
-}
-
-impl AppContext {
-    pub fn new(
-        mempool_api_repository: impl repository::MempoolAPIRepository + 'static,
-        nodes_repository: impl repository::NodesRepository + 'static,
-    ) -> Self {
-        Self {
-            mempool_api_repository: Arc::new(RwLock::new(mempool_api_repository)),
-            nodes_repository: Arc::new(RwLock::new(nodes_repository)),
-        }
-    }
-}
+use crate::context::AppContext;
+use crate::models::LightningNodes;
 
 pub fn app_router() -> Router {
-    let app_context = AppContext::new(
-        repository::MockMempoolAPIRepository(Arc::new(vec![LightningNodes {
-            alias: "node1".to_string(),
-            public_key: "dsad".to_string(),
-            capacity: 21321,
-            first_seen: 21312,
-        }])),
-        repository::InMemoryNodesRepository(Arc::new(RwLock::new(vec![LightningNodes {
-            alias: "node1".to_string(),
-            public_key: "dsad".to_string(),
-            capacity: 21321,
-            first_seen: 21312,
-        }]))),
-    );
+    let app_context = AppContext::new();
 
     Router::new()
         .route("/ping", get("pong"))
         .route("/nodes", get(endpoints::get_nodes))
+        .route("/update", get(endpoints::update_last_nodes))
         .with_state(app_context)
 }
 
 mod endpoints {
-    use std::sync::Arc;
-
-    use axum::Json;
-    use axum::extract::State;
-    use axum::http::StatusCode;
-
-    use crate::api::AppContext;
-    use crate::entity::LightningNodes;
-    use crate::handlers;
-    use crate::repository::{MempoolAPIRepository, NodesRepository};
+    use super::*;
+    use crate::handlers::{GetLastNodes, UpdateLastNodes};
 
     #[axum::debug_handler]
     pub async fn get_nodes(
         State(ctx): State<AppContext>,
     ) -> Result<Json<Vec<LightningNodes>>, String> {
-        let nodes = &*ctx.nodes_repository.read().await; //.map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-        handlers::get_last_nodes(nodes)
-            .await
-            .map(|nodes| Json(nodes))
+        let nodes = GetLastNodes {
+            nodes_repository: ctx.nodes_repository.clone(),
+        }
+        .exec()
+        .await?;
+        return Ok(Json(nodes));
+    }
+
+    #[axum::debug_handler]
+    pub async fn update_last_nodes(
+        State(ctx): State<AppContext>,
+    ) -> Result<Json<Vec<LightningNodes>>, String> {
+        let result = UpdateLastNodes {
+            mempool_api_repository: ctx.mempool_api_repository.clone(),
+            nodes_repository: ctx.nodes_repository.clone(),
+        }
+        .exec()
+        .await?;
+        return Ok(Json(result));
     }
 }
