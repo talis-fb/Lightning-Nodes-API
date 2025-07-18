@@ -23,12 +23,9 @@ impl NodesRepository for RedisNodesRepository {
         let mut conn = self.connection_pool.get().await?;
 
         let json_nodes: Option<String> = conn.get(REDIS_NODES_KEY).await?;
+        let json_nodes = json_nodes.unwrap_or("[]".to_string());
 
-        if json_nodes.is_none() {
-            return Ok(vec![]);
-        }
-
-        let nodes: Vec<LightningNodes> = serde_json::from_str(&json_nodes.unwrap()).unwrap();
+        let nodes: Vec<LightningNodes> = serde_json::from_str(&json_nodes)?;
         Ok(nodes)
     }
 
