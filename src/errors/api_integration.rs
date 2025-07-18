@@ -2,7 +2,7 @@ use thiserror::Error;
 
 use crate::errors::ApiError;
 
-// TODO: 
+// TODO:
 // * embed errors inside these ones to show the inner error on response and debug
 
 #[derive(Error, Debug)]

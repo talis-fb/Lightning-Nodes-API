@@ -14,7 +14,7 @@ impl From<anyhow::Error> for ApiError {
     fn from(err: anyhow::Error) -> Self {
         ApiError {
             code: 500,
-            detail: err.to_string().into(),
+            detail: err.to_string(),
         }
     }
 }

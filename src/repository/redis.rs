@@ -28,7 +28,7 @@ impl NodesRepository for RedisNodesRepository {
         if json_nodes.is_none() {
             return Err(NodesNotFound.into());
         }
-        
+
         let json_nodes = json_nodes.unwrap();
 
         let nodes: Vec<LightningNodes> = serde_json::from_str(&json_nodes)?;

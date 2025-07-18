@@ -1,8 +1,8 @@
 use axum::Json;
 use axum::extract::State;
 
-use crate::errors::ApiError;
 use crate::context::AppContext;
+use crate::errors::ApiError;
 use crate::handlers::{GetLastNodes, UpdateLastNodes};
 use crate::models::LightningNodes;
 
