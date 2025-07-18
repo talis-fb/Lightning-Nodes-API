@@ -1,8 +1,14 @@
+use std::time::Duration;
+
+use tokio::time::MissedTickBehavior;
+
 use crate::context::AppContext;
 use crate::handlers::UpdateLastNodes;
 
 pub async fn run(ctx: AppContext, seconds_interval: u64) -> anyhow::Result<()> {
-    let mut interval = tokio::time::interval(std::time::Duration::from_secs(seconds_interval));
+    let mut interval = tokio::time::interval(Duration::from_secs(seconds_interval));
+    interval.set_missed_tick_behavior(MissedTickBehavior::Skip);
+
     loop {
         interval.tick().await;
 
@@ -15,6 +21,13 @@ pub async fn run(ctx: AppContext, seconds_interval: u64) -> anyhow::Result<()> {
         .exec()
         .await;
 
-        eprintln!("Updated nodes with: {:?} nodes", res.unwrap().len());
+        match res {
+            Ok(nodes) => {
+                eprintln!("Updated nodes with: {:?} nodes", nodes.len());
+            }
+            Err(e) => {
+                eprintln!("Error updating nodes: {}", e);
+            }
+        }
     }
 }
