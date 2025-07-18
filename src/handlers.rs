@@ -11,7 +11,7 @@ pub struct UpdateLastNodes {
 impl UpdateLastNodes {
     pub async fn exec(self) -> anyhow::Result<Vec<LightningNodes>> {
         let nodes = self.mempool_api_repository.get_last_nodes().await?;
-        let _ = self.nodes_repository.append_nodes(nodes).await;
+        self.nodes_repository.append_nodes(nodes).await?;
         self.nodes_repository.get_last_nodes().await
     }
 }
