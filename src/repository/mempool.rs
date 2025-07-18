@@ -1,5 +1,3 @@
-use std::time::UNIX_EPOCH;
-
 use async_trait::async_trait;
 
 use crate::models::LightningNodes;
