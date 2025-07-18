@@ -5,8 +5,8 @@ use axum::{Json, Router};
 use crate::context::AppContext;
 use crate::models::LightningNodes;
 
-pub fn app_router() -> Router {
-    let app_context = AppContext::new();
+pub async fn app_router() -> Router {
+    let app_context = AppContext::new().await;
 
     Router::new()
         .route("/ping", get("pong"))
@@ -27,8 +27,9 @@ mod endpoints {
             nodes_repository: ctx.nodes_repository.clone(),
         }
         .exec()
-        .await?;
-        return Ok(Json(nodes));
+        .await
+        .map_err(|err| err.to_string())?;
+        Ok(Json(nodes))
     }
 
     #[axum::debug_handler]
@@ -40,7 +41,8 @@ mod endpoints {
             nodes_repository: ctx.nodes_repository.clone(),
         }
         .exec()
-        .await?;
-        return Ok(Json(result));
+        .await
+        .map_err(|err| err.to_string())?;
+        Ok(Json(result))
     }
 }

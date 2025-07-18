@@ -1,11 +1,10 @@
 use std::sync::Arc;
 
-use tokio::sync::RwLock;
+use bb8_redis::RedisConnectionManager;
 
-use crate::models::LightningNodes;
-use crate::repository::{
-    InMemoryNodesRepository, MempoolAPIRepository, MockMempoolAPIRepository, NodesRepository
-};
+use crate::repository::mempool::MempoolAPIRepositoryImpl;
+use crate::repository::redis::RedisNodesRepository;
+use crate::repository::{MempoolAPIRepository, NodesRepository};
 
 #[derive(Clone)]
 pub struct AppContext {
@@ -14,17 +13,16 @@ pub struct AppContext {
 }
 
 impl AppContext {
-    pub fn new() -> Self {
-        let mock_mempool_api_repository = MockMempoolAPIRepository(Vec::from([LightningNodes {
-            alias: "node1".to_string(),
-            public_key: "dsad".to_string(),
-            capacity: 21321,
-            first_seen: 21312,
-        }]));
-        let nodes_repository = InMemoryNodesRepository::default();
+    pub async fn new() -> Self {
+        // TODO: setup envs
+        let manager = RedisConnectionManager::new("redis://localhost:6379").unwrap();
+        let pool = bb8::Pool::builder().build(manager).await.unwrap();
+        let nodes_repository = RedisNodesRepository {
+            connection_pool: pool,
+        };
 
         Self {
-            mempool_api_repository: Arc::new(mock_mempool_api_repository),
+            mempool_api_repository: Arc::new(MempoolAPIRepositoryImpl),
             nodes_repository: Arc::new(nodes_repository),
         }
     }
