@@ -3,7 +3,8 @@ stages:
   - publish
 
 variables:
-  DOCKER_HOST: tcp://docker:2375
+  DOCKER_HOST: tcp://docker:2376
+  DOCKER_TLS_CERTDIR: "/certs"
   GITLAB_IMAGE_NAME: $CI_REGISTRY_IMAGE/lightning-nodes
   COMMIT_TAG: $CI_COMMIT_SHORT_SHA
 
@@ -14,34 +15,17 @@ cargo-fmt:
     - rustup component add rustfmt
     - cargo fmt --check
 
-cargo-build-test:
-  stage: ci
-  image: rust:1.88
-  script:
-    - cargo build --release
-
 cargo-test:
   stage: ci
   image: rust:1.88
   script:
     - cargo test
 
-build-base-image:
-  stage: publish
-  image: docker:cli
-  services:
-    - docker:dind
-  script:
-    - docker build --pull .
-  only:
-    - main
-
 .publish-template:
   stage: publish
-  needs: [build-base-image]
-  image: docker:cli
+  image: docker:27.4.1
   services:
-    - docker:dind
+    - docker:27.4.1-dind
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
   only:
@@ -50,7 +34,8 @@ build-base-image:
 publish-full:
   extends: .publish-template
   script:
-    - docker build --pull -t "$GITLAB_IMAGE_NAME:full" .
+    - docker pull $CI_REGISTRY_IMAGE:latest || true
+    - docker build -t "$GITLAB_IMAGE_NAME:full" --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $GITLAB_IMAGE_NAME:latest .
     - docker tag "$GITLAB_IMAGE_NAME:full" "$GITLAB_IMAGE_NAME:full-$COMMIT_TAG"
     - docker push "$GITLAB_IMAGE_NAME:full"
     - docker push "$GITLAB_IMAGE_NAME:full-$COMMIT_TAG"
@@ -58,17 +43,21 @@ publish-full:
     - docker push "$GITLAB_IMAGE_NAME:latest"
 
 publish-api-only:
+  needs: [publish-full]
   extends: .publish-template
   script:
-    - docker build --pull -t "$GITLAB_IMAGE_NAME:api-only" --build-arg FEATURES="disable_api" .
+    - docker pull $GITLAB_IMAGE_NAME:latest
+    - docker build -t "$GITLAB_IMAGE_NAME:api-only" --build-arg FEATURES="disable_api" --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $GITLAB_IMAGE_NAME:latest .
     - docker tag "$GITLAB_IMAGE_NAME:api-only" "$GITLAB_IMAGE_NAME:api-only-$COMMIT_TAG"
     - docker push "$GITLAB_IMAGE_NAME:api-only"
     - docker push "$GITLAB_IMAGE_NAME:api-only-$COMMIT_TAG"
   
 publish-worker-only:
+  needs: [publish-full]
   extends: .publish-template
   script:
-    - docker build --pull -t "$GITLAB_IMAGE_NAME:worker-only" --build-arg FEATURES="disable_worker" .
+    - docker pull $GITLAB_IMAGE_NAME:latest
+    - docker build --pull -t "$GITLAB_IMAGE_NAME:worker-only" --build-arg FEATURES="disable_worker" --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $GITLAB_IMAGE_NAME:latest .
     - docker tag "$GITLAB_IMAGE_NAME:worker-only" "$GITLAB_IMAGE_NAME:worker-only-$COMMIT_TAG"
     - docker push "$GITLAB_IMAGE_NAME:worker-only"
     - docker push "$GITLAB_IMAGE_NAME:worker-only-$COMMIT_TAG"
