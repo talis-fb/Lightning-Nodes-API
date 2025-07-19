@@ -16,6 +16,7 @@ cargo-fmt:
     - cargo fmt --check
 
 cargo-test:
+  needs: [cargo-fmt]
   stage: ci
   image: rust:1.88
   script:
