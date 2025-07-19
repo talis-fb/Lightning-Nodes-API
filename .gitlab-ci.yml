@@ -1,5 +1,11 @@
 stages:
   - ci
+  - publish
+
+variables:
+  DOCKER_HOST: tcp://docker:2375
+  GITLAB_IMAGE_NAME: $CI_REGISTRY_IMAGE/lightning-nodes
+  COMMIT_TAG: $CI_COMMIT_SHORT_SHA
 
 cargo-fmt:
   stage: ci
@@ -19,3 +25,47 @@ cargo-test:
   image: rust:1.88
   script:
     - cargo test
+
+publish-full:
+  stage: publish
+  image: docker:cli
+  services:
+    - docker:dind
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - docker build --pull -t "$GITLAB_IMAGE_NAME:full" .
+    - docker tag "$GITLAB_IMAGE_NAME:full" "$GITLAB_IMAGE_NAME:latest"
+    - docker tag "$GITLAB_IMAGE_NAME:full" "$GITLAB_IMAGE_NAME:full-$COMMIT_TAG"
+    - docker push "$GITLAB_IMAGE_NAME:latest"
+    - docker push "$GITLAB_IMAGE_NAME:full"
+    - docker push "$GITLAB_IMAGE_NAME:full-$COMMIT_TAG"
+  only:
+    - main
+
+publish-api-only:
+  stage: publish
+  image: docker:cli
+  services:
+    - docker:dind
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - docker build --pull -t "$GITLAB_IMAGE_NAME:api-only" --build-arg FEATURES="disable_api" .
+    - docker tag "$GITLAB_IMAGE_NAME:api-only" "$GITLAB_IMAGE_NAME:api-only-$COMMIT_TAG"
+    - docker push "$GITLAB_IMAGE_NAME:api-only"
+    - docker push "$GITLAB_IMAGE_NAME:api-only-$COMMIT_TAG"
+  only:
+    - main
+  
+publish-worker-only:
+  stage: publish
+  image: docker:cli
+  services:
+    - docker:dind
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - docker build --pull -t "$GITLAB_IMAGE_NAME:worker-only" --build-arg FEATURES="disable_worker" .
+    - docker tag "$GITLAB_IMAGE_NAME:worker-only" "$GITLAB_IMAGE_NAME:worker-only-$COMMIT_TAG"
+    - docker push "$GITLAB_IMAGE_NAME:worker-only"
+    - docker push "$GITLAB_IMAGE_NAME:worker-only-$COMMIT_TAG"
+  only:
+    - main

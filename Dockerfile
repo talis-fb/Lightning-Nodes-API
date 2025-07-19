@@ -14,7 +14,10 @@ RUN rm src/*.rs
 RUN rm ./target/release/deps/bipa*
 
 COPY src/ src/
-RUN cargo build --release
+
+ARG FEATURES=""
+
+RUN cargo build --release --features "$FEATURES"
 
 FROM alpine:latest AS runner
 
