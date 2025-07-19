@@ -1,13 +1,18 @@
 use std::time::Duration;
 
-use axum::Router;
+use axum::error_handling::HandleErrorLayer;
 use axum::extract::Request;
+use axum::http::StatusCode;
 use axum::response::Response;
 use axum::routing::get;
+use axum::{BoxError, Router};
+use tower::ServiceBuilder;
+use tower::timeout::TimeoutLayer;
 use tower_http::trace::TraceLayer;
 use tracing::{Span, error, info, info_span};
 
-use crate::{context::AppContext, env};
+use crate::context::AppContext;
+use crate::env;
 
 mod endpoints;
 
@@ -16,6 +21,14 @@ pub async fn app_router(ctx: AppContext) -> Router {
         .route("/ping", get("pong"))
         .route("/nodes", get(endpoints::get_nodes))
         .route("/update", get(endpoints::update_last_nodes))
+        .layer(
+            // Add Timeout
+            ServiceBuilder::new()
+                .layer(HandleErrorLayer::new(|_: BoxError| async {
+                    StatusCode::REQUEST_TIMEOUT
+                }))
+                .layer(TimeoutLayer::new(Duration::from_secs(5))),
+        )
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(|request: &Request<_>| {
