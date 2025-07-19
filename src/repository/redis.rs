@@ -14,8 +14,6 @@ pub struct RedisNodesRepository {
 const REDIS_NODES_KEY: &str = "nodes";
 
 // TODO: Handle when database is not connecting
-// * Add timeout
-// * Add retry
 // * Expose a health endpoint
 
 #[async_trait]

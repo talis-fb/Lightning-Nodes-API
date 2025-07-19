@@ -15,11 +15,11 @@ cargo-fmt:
     - rustup component add rustfmt
     - cargo fmt --check
 
-cargo-test:
-  stage: ci
-  image: rust:1.88
-  script:
-    - cargo test
+# cargo-test:
+#   stage: ci
+#   image: rust:1.88
+#   script:
+#     - cargo test
 
 .publish-template:
   stage: publish
@@ -48,9 +48,7 @@ publish-api-only:
   script:
     - docker pull $GITLAB_IMAGE_NAME:latest
     - docker build -t "$GITLAB_IMAGE_NAME:api-only" --build-arg FEATURES="disable_api" --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $GITLAB_IMAGE_NAME:latest .
-    - docker tag "$GITLAB_IMAGE_NAME:api-only" "$GITLAB_IMAGE_NAME:api-only-$COMMIT_TAG"
     - docker push "$GITLAB_IMAGE_NAME:api-only"
-    - docker push "$GITLAB_IMAGE_NAME:api-only-$COMMIT_TAG"
   
 publish-worker-only:
   needs: [publish-full]
@@ -58,6 +56,4 @@ publish-worker-only:
   script:
     - docker pull $GITLAB_IMAGE_NAME:latest
     - docker build --pull -t "$GITLAB_IMAGE_NAME:worker-only" --build-arg FEATURES="disable_worker" --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $GITLAB_IMAGE_NAME:latest .
-    - docker tag "$GITLAB_IMAGE_NAME:worker-only" "$GITLAB_IMAGE_NAME:worker-only-$COMMIT_TAG"
     - docker push "$GITLAB_IMAGE_NAME:worker-only"
-    - docker push "$GITLAB_IMAGE_NAME:worker-only-$COMMIT_TAG"

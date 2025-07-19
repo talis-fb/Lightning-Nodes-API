@@ -1,3 +1,4 @@
+use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use serde::{Deserialize, Serialize};
 
@@ -6,7 +7,7 @@ pub mod redis;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ApiError {
-    code: u32,
+    code: u16,
     detail: String,
 }
 
@@ -20,15 +21,17 @@ impl From<anyhow::Error> for ApiError {
 }
 
 impl IntoResponse for ApiError {
-    // TODO:
-    // Set the real response status code to "code" field
     fn into_response(self) -> axum::response::Response {
-        axum::response::Json(self).into_response()
+        let status_code =
+            StatusCode::from_u16(self.code).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR);
+        let mut response = axum::response::Json(self).into_response();
+        *response.status_mut() = status_code;
+        response
     }
 }
 
 impl ApiError {
-    pub fn new(code: u32, detail: String) -> Self {
+    pub fn new(code: u16, detail: String) -> Self {
         ApiError { code, detail }
     }
 }
