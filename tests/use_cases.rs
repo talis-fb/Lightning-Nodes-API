@@ -64,7 +64,6 @@ async fn test_basic_flow() {
     assert_eq!(nodes[0].alias, api_node.alias);
 }
 
-
 #[tokio::test]
 async fn test_transform_values() {
     let api_nodes = [

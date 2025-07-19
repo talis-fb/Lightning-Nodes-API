@@ -1,4 +1,4 @@
-use chrono::{DateTime, NaiveDateTime, SecondsFormat, TimeZone, Utc};
+use chrono::{SecondsFormat, TimeZone, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
@@ -36,7 +36,7 @@ impl TryFrom<LightningNodes> for LightningNodesView {
             let integer = value.capacity / 100_000_000;
             match integer {
                 0 => format!("{decimal}"),
-                _ => format!("{}.{:08}", integer, decimal),
+                _ => format!("{integer}.{decimal:08}"),
             }
         };
 

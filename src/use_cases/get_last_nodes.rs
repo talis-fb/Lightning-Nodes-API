@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::models::{LightningNodes, LightningNodesView};
+use crate::models::LightningNodesView;
 use crate::repository::NodesRepository;
 
 pub struct GetLastNodes {
