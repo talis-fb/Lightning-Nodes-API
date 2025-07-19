@@ -4,6 +4,7 @@ mod api;
 mod context;
 mod errors;
 mod handlers;
+mod logging;
 mod models;
 mod repository;
 mod worker;
@@ -13,6 +14,8 @@ compile_error!("You cannot disable both api and worker features");
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    logging::setup_logging();
+
     let app_context = AppContext::new().await;
 
     let api_server = if cfg!(feature = "disable_api") {
