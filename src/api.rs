@@ -1,12 +1,11 @@
 use std::time::Duration;
 
 use axum::Router;
-use axum::extract::{MatchedPath, Request};
+use axum::extract::Request;
 use axum::response::Response;
 use axum::routing::get;
-use tower_http::classify::ServerErrorsFailureClass;
 use tower_http::trace::TraceLayer;
-use tracing::{Span, error, error_span, info, info_span};
+use tracing::{Span, error, info, info_span};
 
 use crate::context::AppContext;
 
