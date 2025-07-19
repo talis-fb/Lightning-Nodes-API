@@ -57,7 +57,7 @@ pub async fn run(ctx: AppContext) -> anyhow::Result<()> {
 
     let api_router = app_router(ctx).await;
     let listener = tokio::net::TcpListener::bind(addr).await?;
-    tracing::info!("Starting HTTP server on {}", listener.local_addr().unwrap());
+    tracing::info!("[Ok] Starting HTTP server on {}", listener.local_addr().unwrap());
     axum::serve(listener, api_router).await?;
     Ok(())
 }

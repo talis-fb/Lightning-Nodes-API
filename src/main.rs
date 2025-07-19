@@ -29,7 +29,7 @@ async fn main() -> anyhow::Result<()> {
     let worker = if cfg!(feature = "disable_worker") {
         tokio::spawn(futures::future::pending())
     } else {
-        tokio::spawn(worker::run(app_context, 10))
+        tokio::spawn(worker::run(app_context))
     };
 
     tokio::select! {
