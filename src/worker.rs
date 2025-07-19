@@ -5,7 +5,7 @@ use tracing::{Instrument, info_span};
 
 use crate::context::AppContext;
 use crate::env;
-use crate::handlers::UpdateLastNodes;
+use crate::use_cases::fetch_last_nodes::FetchLastNodes;
 
 pub async fn run(ctx: AppContext) -> anyhow::Result<()> {
     let seconds_interval = *env::WORKER_INTERVAL_SECONDS;
@@ -19,7 +19,7 @@ pub async fn run(ctx: AppContext) -> anyhow::Result<()> {
         interval.tick().await;
 
         async {
-            let response = UpdateLastNodes {
+            let response = FetchLastNodes {
                 mempool_api_repository: ctx.mempool_api_repository.clone(),
                 nodes_repository: ctx.nodes_repository.clone(),
             }

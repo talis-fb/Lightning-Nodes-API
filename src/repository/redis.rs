@@ -13,9 +13,6 @@ pub struct RedisNodesRepository {
 
 const REDIS_NODES_KEY: &str = "nodes";
 
-// TODO: Handle when database is not connecting
-// * Expose a health endpoint
-
 #[async_trait]
 impl NodesRepository for RedisNodesRepository {
     async fn get_last_nodes(&self) -> anyhow::Result<Vec<LightningNodes>> {

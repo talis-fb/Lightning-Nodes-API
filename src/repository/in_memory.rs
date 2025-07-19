@@ -6,7 +6,7 @@ use tokio::sync::RwLock;
 use crate::models::LightningNodes;
 use crate::repository::{MempoolAPIRepository, NodesRepository};
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct InMemoryNodesRepository(pub Arc<RwLock<Vec<LightningNodes>>>);
 
 #[async_trait]
@@ -22,7 +22,7 @@ impl NodesRepository for InMemoryNodesRepository {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct MockMempoolAPIRepository(pub Vec<LightningNodes>);
 
 #[async_trait]

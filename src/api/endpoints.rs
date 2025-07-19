@@ -3,8 +3,9 @@ use axum::extract::State;
 
 use crate::context::AppContext;
 use crate::errors::ApiError;
-use crate::handlers::{GetLastNodes, UpdateLastNodes};
 use crate::models::{HealthResponse, LightningNodes};
+use crate::use_cases::fetch_last_nodes::FetchLastNodes;
+use crate::use_cases::get_last_nodes::GetLastNodes;
 
 #[axum::debug_handler]
 pub async fn get_nodes(
@@ -22,7 +23,7 @@ pub async fn get_nodes(
 pub async fn update_last_nodes(
     State(ctx): State<AppContext>,
 ) -> Result<Json<Vec<LightningNodes>>, ApiError> {
-    let result = UpdateLastNodes {
+    let result = FetchLastNodes {
         mempool_api_repository: ctx.mempool_api_repository.clone(),
         nodes_repository: ctx.nodes_repository.clone(),
     }

@@ -1,13 +1,21 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[allow(non_snake_case)]
 pub struct LightningNodes {
-    #[serde(rename = "publicKey")]
-    pub public_key: String,
+    pub publicKey: String,
     pub alias: String,
     pub capacity: u64,
-    #[serde(rename = "firstSeen")]
-    pub first_seen: u64,
+    pub firstSeen: u64,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[allow(non_snake_case)]
+pub struct LightningNodesView {
+    pub publicKey: String,
+    pub alias: String,
+    pub capacity: String,
+    pub firstSeen: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
