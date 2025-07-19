@@ -30,5 +30,6 @@ async fn main() -> anyhow::Result<()> {
     tokio::select! {
         v = api_server => Err(anyhow::anyhow!("API server finished: {:?}", v)),
         v = worker => Err(anyhow::anyhow!("Worker finished: {:?}", v)),
+        _ = tokio::signal::ctrl_c() => Err(anyhow::anyhow!("Ctrl+C")),
     }
 }
