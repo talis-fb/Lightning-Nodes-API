@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::models::LightningNodes;
+use crate::models::{LightningNodes, LightningNodesView};
 use crate::repository::{MempoolAPIRepository, NodesRepository};
 
 pub struct FetchLastNodes {
@@ -15,8 +15,16 @@ impl FetchLastNodes {
         let nodes = self.mempool_api_repository.get_last_nodes().await?;
 
         tracing::info!("Appending {} Nodes", nodes.len());
-        self.nodes_repository.append_nodes(nodes).await?;
 
-        self.nodes_repository.get_last_nodes().await
+        let formatted_nodes: Vec<LightningNodesView> = nodes
+            .clone()
+            .into_iter()
+            .map(|node| node.try_into())
+            .filter_map(|result| result.ok())
+            .collect();
+
+        self.nodes_repository.append_nodes(formatted_nodes).await?;
+
+        Ok(nodes)
     }
 }

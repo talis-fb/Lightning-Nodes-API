@@ -3,14 +3,14 @@ use axum::extract::State;
 
 use crate::context::AppContext;
 use crate::errors::ApiError;
-use crate::models::{HealthResponse, LightningNodes};
+use crate::models::{HealthResponse, LightningNodes, LightningNodesView};
 use crate::use_cases::fetch_last_nodes::FetchLastNodes;
 use crate::use_cases::get_last_nodes::GetLastNodes;
 
 #[axum::debug_handler]
 pub async fn get_nodes(
     State(ctx): State<AppContext>,
-) -> Result<Json<Vec<LightningNodes>>, ApiError> {
+) -> Result<Json<Vec<LightningNodesView>>, ApiError> {
     let nodes = GetLastNodes {
         nodes_repository: ctx.nodes_repository.clone(),
     }

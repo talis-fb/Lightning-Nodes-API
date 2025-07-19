@@ -3,19 +3,19 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use tokio::sync::RwLock;
 
-use crate::models::LightningNodes;
+use crate::models::{LightningNodes, LightningNodesView};
 use crate::repository::{MempoolAPIRepository, NodesRepository};
 
 #[derive(Default, Clone)]
-pub struct InMemoryNodesRepository(pub Arc<RwLock<Vec<LightningNodes>>>);
+pub struct InMemoryNodesRepository(pub Arc<RwLock<Vec<LightningNodesView>>>);
 
 #[async_trait]
 impl NodesRepository for InMemoryNodesRepository {
-    async fn get_last_nodes(&self) -> anyhow::Result<Vec<LightningNodes>> {
+    async fn get_last_nodes(&self) -> anyhow::Result<Vec<LightningNodesView>> {
         Ok((*self.0.read().await).clone())
     }
 
-    async fn append_nodes(&self, nodes: Vec<LightningNodes>) -> anyhow::Result<()> {
+    async fn append_nodes(&self, nodes: Vec<LightningNodesView>) -> anyhow::Result<()> {
         let mut guard = self.0.write().await;
         *guard = nodes;
         Ok(())
