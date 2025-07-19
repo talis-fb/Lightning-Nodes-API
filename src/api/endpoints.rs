@@ -32,9 +32,7 @@ pub async fn update_last_nodes(
 }
 
 #[axum::debug_handler]
-pub async fn health(
-    State(ctx): State<AppContext>,
-) -> Result<Json<HealthResponse>, ApiError> {
+pub async fn health(State(ctx): State<AppContext>) -> Result<Json<HealthResponse>, ApiError> {
     let result = ctx.health_check().await;
     Ok(Json(result))
 }

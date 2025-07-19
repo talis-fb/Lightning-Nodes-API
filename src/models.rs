@@ -10,8 +10,6 @@ pub struct LightningNodes {
     pub first_seen: u64,
 }
 
-
-
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum HealthStatus {
     Ok,
