@@ -4,7 +4,7 @@ use axum::extract::State;
 use crate::context::AppContext;
 use crate::errors::ApiError;
 use crate::handlers::{GetLastNodes, UpdateLastNodes};
-use crate::models::LightningNodes;
+use crate::models::{HealthResponse, LightningNodes};
 
 #[axum::debug_handler]
 pub async fn get_nodes(
@@ -28,5 +28,13 @@ pub async fn update_last_nodes(
     }
     .exec()
     .await?;
+    Ok(Json(result))
+}
+
+#[axum::debug_handler]
+pub async fn health(
+    State(ctx): State<AppContext>,
+) -> Result<Json<HealthResponse>, ApiError> {
+    let result = ctx.health_check().await;
     Ok(Json(result))
 }
