@@ -7,7 +7,7 @@ use axum::routing::get;
 use tower_http::trace::TraceLayer;
 use tracing::{Span, error, info, info_span};
 
-use crate::context::AppContext;
+use crate::{context::AppContext, env};
 
 mod endpoints;
 
@@ -37,8 +37,11 @@ pub async fn app_router(ctx: AppContext) -> Router {
         .with_state(ctx)
 }
 
-pub async fn run(ctx: AppContext, port: u16) -> anyhow::Result<()> {
-    let addr = format!("0.0.0.0:{}", port);
+pub async fn run(ctx: AppContext) -> anyhow::Result<()> {
+    let host = &*env::HOST;
+    let port = &*env::PORT;
+    let addr = format!("{}:{}", host, port);
+
     let api_router = app_router(ctx).await;
     let listener = tokio::net::TcpListener::bind(addr).await?;
     tracing::info!("Starting HTTP server on {}", listener.local_addr().unwrap());

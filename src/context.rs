@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use bb8_redis::RedisConnectionManager;
 
+use crate::env;
 use crate::repository::mempool::MempoolAPIRepositoryImpl;
 use crate::repository::redis::RedisNodesRepository;
 use crate::repository::{MempoolAPIRepository, NodesRepository};
@@ -14,8 +15,8 @@ pub struct AppContext {
 
 impl AppContext {
     pub async fn new() -> Self {
-        // TODO: setup envs
-        let manager = RedisConnectionManager::new("redis://localhost:6379").unwrap();
+        let redis_url = &*env::REDIS_URL;
+        let manager = RedisConnectionManager::new(redis_url.as_str()).unwrap();
         let pool = bb8::Pool::builder().build(manager).await.unwrap();
         let nodes_repository = RedisNodesRepository {
             connection_pool: pool,
