@@ -22,39 +22,28 @@ cargo-test:
   script:
     - cargo test
 
-.publish-template:
+publish:
   stage: publish
-  image: docker:27.4.1
+  image: docker:cli
   services:
-    - docker:27.4.1-dind
+    - docker:dind
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
-  only:
-    - main
-
-publish-full:
-  extends: .publish-template
   script:
-    - docker pull $CI_REGISTRY_IMAGE:latest || true
-    - docker build -t "$GITLAB_IMAGE_NAME:full" --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $GITLAB_IMAGE_NAME:latest .
+    # Full: Api + Worker (latest)
+    - docker build -t "$GITLAB_IMAGE_NAME:latest" .
+    - docker tag "$GITLAB_IMAGE_NAME:latest" "$GITLAB_IMAGE_NAME:full"
     - docker tag "$GITLAB_IMAGE_NAME:full" "$GITLAB_IMAGE_NAME:full-$COMMIT_TAG"
     - docker push "$GITLAB_IMAGE_NAME:full"
     - docker push "$GITLAB_IMAGE_NAME:full-$COMMIT_TAG"
-    - docker tag "$GITLAB_IMAGE_NAME:full" "$GITLAB_IMAGE_NAME:latest"
     - docker push "$GITLAB_IMAGE_NAME:latest"
 
-publish-api-only:
-  needs: [publish-full]
-  extends: .publish-template
-  script:
-    - docker pull $GITLAB_IMAGE_NAME:latest
-    - docker build -t "$GITLAB_IMAGE_NAME:api-only" --build-arg FEATURES="disable_api" --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $GITLAB_IMAGE_NAME:latest .
+    # Api only
+    - docker build -t "$GITLAB_IMAGE_NAME:api-only" --build-arg FEATURES="disable_worker" .
     - docker push "$GITLAB_IMAGE_NAME:api-only"
-  
-publish-worker-only:
-  needs: [publish-full]
-  extends: .publish-template
-  script:
-    - docker pull $GITLAB_IMAGE_NAME:latest
-    - docker build --pull -t "$GITLAB_IMAGE_NAME:worker-only" --build-arg FEATURES="disable_worker" --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from $GITLAB_IMAGE_NAME:latest .
+
+    # Worker only
+    - docker build -t "$GITLAB_IMAGE_NAME:worker-only" --build-arg FEATURES="disable_api" .
     - docker push "$GITLAB_IMAGE_NAME:worker-only"
+  only:
+    - main
