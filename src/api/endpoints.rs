@@ -3,7 +3,7 @@ use axum::extract::State;
 
 use crate::context::AppContext;
 use crate::errors::ApiError;
-use crate::models::{HealthResponse, LightningNodes, LightningNodesView};
+use crate::models::{HealthResponse, HealthStatus, LightningNodes, LightningNodesView};
 use crate::use_cases::fetch_last_nodes::FetchLastNodes;
 use crate::use_cases::get_last_nodes::GetLastNodes;
 
@@ -36,4 +36,12 @@ pub async fn update_last_nodes(
 pub async fn health(State(ctx): State<AppContext>) -> Result<Json<HealthResponse>, ApiError> {
     let result = ctx.health_check().await;
     Ok(Json(result))
+}
+
+#[axum::debug_handler]
+pub async fn ready(State(ctx): State<AppContext>) -> Result<Json<HealthResponse>, ApiError> {
+    match ctx.health_check().await.status {
+        HealthStatus::Ok => Ok(Json(ctx.health_check().await)),
+        HealthStatus::Pending => Err(ApiError::new(503, "Service not ready".to_string())),
+    }
 }

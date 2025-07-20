@@ -21,7 +21,8 @@ pub async fn app_router(ctx: AppContext) -> Router {
         .route("/ping", get("pong"))
         .route("/nodes", get(endpoints::get_nodes))
         .route("/update", get(endpoints::update_last_nodes))
-        .route("/health", get(endpoints::health))
+        .route("/healthz", get(endpoints::health))
+        .route("/ready", get(endpoints::ready))
         .layer(
             // Add Timeout
             ServiceBuilder::new()
