@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bipa-challenge-worker-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bipa-challenge-worker-deployment
+  template:
+    metadata:
+      labels:
+        app: bipa-challenge-worker-deployment
+    spec:
+      containers:
+        - name: bipa-challenge-worker
+          image: registry.gitlab.com/talis-fb/lightning-nodes-api/lightning-nodes:worker-only
+          imagePullPolicy: Always
+          env:
+            - name: REDIS_URL
+              value: "redis://redis-master:6379"
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "250m"
+            limits:
+              memory: "64Mi"
+              cpu: "500m"
