@@ -3,14 +3,14 @@ kind: Deployment
 metadata:
   name: bipa-challenge-api-deployment
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: bipa-challenge-api-deployment
+      app: bipa-challenge-api-deployment
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: bipa-challenge-api-deployment
+        app: bipa-challenge-api-deployment
     spec:
       containers:
         - name: bipa-challenge-api
@@ -20,7 +20,7 @@ spec:
             - containerPort: 8080
           env:
             - name: REDIS_URL
-              value: "redis://redis-service:6379"
+              value: "redis://redis-master:6379"
           resources:
             requests:
               memory: "32Mi"
@@ -28,20 +28,20 @@ spec:
             limits:
               memory: "64Mi"
               cpu: "500m"
-          livenessProbe:
-            httpGet:
-              path: /ping
-              port: 8080
-            periodSeconds: 5
-            initialDelaySeconds: 2
-            timeoutSeconds: 5
-          readinessProbe:
-            httpGet:
-              path: /ready
-              port: 8080
-            periodSeconds: 5
-            initialDelaySeconds: 2
-            timeoutSeconds: 5
+          # livenessProbe:
+          #   httpGet:
+          #     path: /ping
+          #     port: 8080
+          #   periodSeconds: 5
+          #   initialDelaySeconds: 2
+          #   timeoutSeconds: 5
+          # readinessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: 8080
+          #   periodSeconds: 5
+          #   initialDelaySeconds: 2
+          #   timeoutSeconds: 5
 ---
 apiVersion: v1
 kind: Service
@@ -50,8 +50,9 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    app.kubernetes.io/name: bipa-challenge-api-deployment
+    app: bipa-challenge-api-deployment
   ports:
     - protocol: TCP
-      port: 80
+      port: 8080
       targetPort: 8080
+      name: api-port
