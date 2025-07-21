@@ -26,6 +26,4 @@ WORKDIR /app
 
 COPY --from=builder /app/target/release/bipa /app/bipa
 
-EXPOSE 3000
-
 CMD ["./bipa"]
