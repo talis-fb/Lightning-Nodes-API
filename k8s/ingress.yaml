@@ -4,7 +4,8 @@ metadata:
   name: bipa-challenge-api-ingress
 spec:
   rules:
-  - http:
+  - host: bipa.talison.dev
+    http:
       paths:
       - path: /
         pathType: Prefix
