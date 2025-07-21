@@ -18,6 +18,7 @@ mod endpoints;
 
 pub async fn app_router(ctx: AppContext) -> Router {
     Router::new()
+        .route("/", get("Welcome to the Lightning Nodes API"))
         .route("/ping", get("pong"))
         .route("/nodes", get(endpoints::get_nodes))
         .route("/update", get(endpoints::update_last_nodes))
