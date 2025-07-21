@@ -2,15 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: bipa-challenge-api-ingress
-  # annotations:
-  #   kubernetes.io/ingress.class: "gce"
 spec:
-  # defaultBackend:
-  #   service:
-  #     name: bipa-challenge-api-service
-  #     port:
-  #       number: 8080
-  # ingressClassName: 'gce'
   rules:
   - http:
       paths:
