@@ -24,7 +24,7 @@ Check it out here:  ```http://bipa.talison.dev/nodes``` (only http)
 ## Build tools, Libraries & versions used
 
 - **Language**: Rust 1.88
-- **Database**: Redis
+- **Database**: Redis 7.2
 - **DevOps**: Gitlab CI/CD + Docker
 - **Deploy**: Google Cloud + Kubernetes
 
