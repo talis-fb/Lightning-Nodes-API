@@ -4,7 +4,7 @@ use axum::error_handling::HandleErrorLayer;
 use axum::extract::Request;
 use axum::http::StatusCode;
 use axum::response::Response;
-use axum::routing::get;
+use axum::routing::{get, put};
 use axum::{BoxError, Router};
 use tower::ServiceBuilder;
 use tower::timeout::TimeoutLayer;
@@ -20,7 +20,7 @@ pub async fn app_router(ctx: AppContext) -> Router {
     Router::new()
         .route("/", get("Welcome to the Lightning Nodes API"))
         .route("/nodes", get(endpoints::get_nodes))
-        .route("/update", get(endpoints::update_last_nodes))
+        .route("/nodes", put(endpoints::update_last_nodes))
         .route("/healthz", get(endpoints::health))
         .route("/ready", get(endpoints::ready))
         .layer(
